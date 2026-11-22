@@ -42,6 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/obras-sociales").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/turnos/disponibles").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/turnos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/especialidades", "/api/especialidades/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/medicos", "/api/medicos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
 
                         // 2. Todo lo demás requiere JWT válido (/api/perfil/**, historial de turnos, cancelaciones, etc.)
                         .anyRequest().authenticated()

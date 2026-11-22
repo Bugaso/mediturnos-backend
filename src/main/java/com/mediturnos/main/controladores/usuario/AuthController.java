@@ -24,4 +24,9 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @GetMapping("/pre-registro/{dni}")
+    public ResponseEntity verificarPreRegistro(@PathVariable String dni) {
+        return ResponseEntity.ok(authService.buscarPreRegistroPorDni(dni));
+    }
 }
