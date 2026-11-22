@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -113,5 +114,19 @@ public class AuthService {
                 .apellido(usuario.getApellido())
                 .email(usuario.getEmail())
                 .build();
+    }
+
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> buscarPreRegistroPorDni(String dni) {
+        return usuarioRepository.findByDni(dni.trim())
+                .filter(u -> u.getPassword() == null) // Solo cuentas parciales (invitados)
+                .map(u -> Map.<String, Object>of(
+                        "encontrado", true,
+                        "nombre", u.getNombre(),
+                        "apellido", u.getApellido(),
+                        "telefono", u.getTelefono()
+                ))
+                .orElse(Map.of("encontrado", false));
     }
 }
