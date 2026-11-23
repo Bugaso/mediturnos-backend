@@ -56,6 +56,8 @@ public class TurnoService {
         DiaSemana diaSemana = convertirDiaSemana(fecha.getDayOfWeek());
         List<HorarioMedico> franjas = horarioMedicoRepository.findByMedico_IdMedicoAndDiaSemana(idMedico, diaSemana);
 
+
+
         if (franjas.isEmpty()) {
             return List.of();
         }
@@ -76,7 +78,12 @@ public class TurnoService {
                 cursor = cursor.plusMinutes(duracionMinutos);
             }
         }
-        return disponibles;
+
+
+
+        return disponibles.stream().filter(disponible -> {
+            return LocalDate.now().isBefore(fecha) || LocalTime.now().isBefore(disponible);
+        }).toList();
     }
 
     @Transactional
