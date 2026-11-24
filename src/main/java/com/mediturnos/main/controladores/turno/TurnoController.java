@@ -93,4 +93,13 @@ public class TurnoController {
         var turno = turnoService.completarTurno(idTurno);
         return ResponseEntity.ok(TurnoResponse.fromEntity(turno));
     }
+
+    @PatchMapping("/{idTurno}/cancelar-invitado")
+    public ResponseEntity<TurnoResponse> cancelarTurnoInvitado(
+            @PathVariable Integer idTurno,
+            @RequestParam Integer idUsuario
+    ) {
+        var turno = turnoService.cancelarTurnoInvitado(idTurno, idUsuario);
+        return ResponseEntity.ok(TurnoResponse.fromEntity(turno));
+    }
 }

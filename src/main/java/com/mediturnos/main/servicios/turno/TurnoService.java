@@ -237,4 +237,27 @@ public class TurnoService {
             case SUNDAY -> DiaSemana.Domingo;
         };
     }
+
+    @Transactional
+    public Turno cancelarTurnoInvitado(Integer idTurno, Integer idUsuario) {
+        Turno turno = turnoRepository.findById(idTurno)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + idTurno));
+
+        Usuario dueno = turno.getUsuario();
+        if (!dueno.getIdUsuario().equals(idUsuario)) {
+            throw new RuntimeException("No tienes permiso para cancelar este turno");
+        }
+
+        // Seguridad: solo permite cancelar sin JWT si el usuario es invitado (sin email ni password)
+        if (dueno.getEmail() != null || dueno.getPassword() != null) {
+            throw new RuntimeException("Este turno pertenece a una cuenta registrada. Inicia sesión para cancelarlo.");
+        }
+
+        if (turno.getEstado() != EstadoTurno.activo) {
+            throw new RuntimeException("Solo se pueden cancelar turnos en estado activo");
+        }
+
+        turno.setEstado(EstadoTurno.cancelado);
+        return turnoRepository.save(turno);
+    }
 }
