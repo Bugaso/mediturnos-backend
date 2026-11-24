@@ -14,6 +14,7 @@ import com.mediturnos.main.repositorios.medico.MedicoRepository;
 import com.mediturnos.main.repositorios.turno.TurnoRepository;
 import com.mediturnos.main.repositorios.usuario.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,13 +37,13 @@ public class TurnoService {
     private final EspecialidadRepository especialidadRepository;
     private final HorarioMedicoRepository horarioMedicoRepository;
 
-    public List<Turno> listarPorUsuario(Integer idUsuario) {
+    /*public List<Turno> listarPorUsuario(Integer idUsuario) {
         return turnoRepository.findByUsuario_IdUsuarioOrderByFechaDescHoraInicioDesc(idUsuario);
     }
 
     public List<Turno> listarActivosPorUsuario(Integer idUsuario) {
         return turnoRepository.findByUsuario_IdUsuarioAndEstado(idUsuario, EstadoTurno.activo);
-    }
+    }*/
 
     public List<Turno> listarAgendaMedicoPorFecha(Integer idMedico, LocalDate fecha) {
         return turnoRepository.findByMedico_IdMedicoAndFechaAndEstadoNot(
@@ -259,5 +260,38 @@ public class TurnoService {
 
         turno.setEstado(EstadoTurno.cancelado);
         return turnoRepository.save(turno);
+    }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void actualizarTurnosVencidos() {
+        LocalDate hoy = LocalDate.now();
+        LocalTime ahora = LocalTime.now();
+
+        List<Turno> activos = turnoRepository.findByEstado(EstadoTurno.activo);
+        List<Turno> vencidos = activos.stream()
+                .filter(t -> t.getFecha().isBefore(hoy) ||
+                        (t.getFecha().isEqual(hoy) && !t.getHoraInicio().isAfter(ahora)))
+                .peek(t -> t.setEstado(EstadoTurno.completado))
+                .toList();
+
+        if (!vencidos.isEmpty()) {
+            turnoRepository.saveAll(vencidos);
+        }
+    }
+
+    @Transactional
+    public List<Turno> listarPorUsuario(Integer idUsuario) {
+        actualizarTurnosVencidos();
+        return turnoRepository.findByUsuario_IdUsuarioAndEstadoNotOrderByFechaActualizacionDescIdTurnoDesc(
+                idUsuario,
+                EstadoTurno.activo
+        );
+    }
+
+    @Transactional
+    public List<Turno> listarActivosPorUsuario(Integer idUsuario) {
+        actualizarTurnosVencidos();
+        return turnoRepository.findByUsuario_IdUsuarioAndEstado(idUsuario, EstadoTurno.activo);
     }
 }

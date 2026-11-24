@@ -49,4 +49,13 @@ public class Turno {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado")
     private EstadoTurno estado = EstadoTurno.activo;
+
+    @Column(name = "fecha_actualizacion")
+    private java.time.LocalDateTime fechaActualizacion;
+
+    @PrePersist
+    @PreUpdate
+    public void actualizarTimestamp() {
+        this.fechaActualizacion = java.time.LocalDateTime.now();
+    }
 }

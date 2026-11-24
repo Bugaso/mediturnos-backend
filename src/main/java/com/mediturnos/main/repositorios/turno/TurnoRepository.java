@@ -13,12 +13,17 @@ import java.util.List;
 public interface TurnoRepository extends JpaRepository<Turno, Integer> {
     List<Turno> findByUsuario_IdUsuarioOrderByFechaDescHoraInicioDesc(Integer idUsuario);
     List<Turno> findByUsuario_IdUsuarioAndEstado(Integer idUsuario, EstadoTurno estado);
+    List<Turno> findByEstado(EstadoTurno estado);
     List<Turno> findByMedico_IdMedicoAndFecha(Integer idMedico, LocalDate fecha);
     List<Turno> findByMedico_IdMedicoAndFechaAndEstadoNot(Integer idMedico, LocalDate fecha, EstadoTurno estado);
     boolean existsByMedico_IdMedicoAndFechaAndHoraInicioAndEstadoNot(
             Integer idMedico,
             LocalDate fecha,
             LocalTime horaInicio,
+            EstadoTurno estado
+    );
+    List<Turno> findByUsuario_IdUsuarioAndEstadoNotOrderByFechaActualizacionDescIdTurnoDesc(
+            Integer idUsuario,
             EstadoTurno estado
     );
 }
